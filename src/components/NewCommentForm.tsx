@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { Post } from '../types/Post';
 import { Comment } from '../types/Comment';
@@ -235,15 +234,4 @@ export const NewCommentForm: React.FC<Props> = ({
       </div>
     </form>
   );
-};
-
-NewCommentForm.propTypes = {
-  addComment: PropTypes.func.isRequired,
-  post: PropTypes.shape({
-    id: PropTypes.number.isRequired,
-    title: PropTypes.string.isRequired,
-    body: PropTypes.string.isRequired,
-    userId: PropTypes.number.isRequired,
-  }).isRequired,
-  hasError: PropTypes.bool,
 };

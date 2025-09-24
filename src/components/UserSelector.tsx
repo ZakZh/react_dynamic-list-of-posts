@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { User } from '../types/User';
 
@@ -73,22 +72,4 @@ export const UserSelector: React.FC<Props> = ({
       </div>
     </div>
   );
-};
-
-UserSelector.propTypes = {
-  users: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.number.isRequired,
-      name: PropTypes.string.isRequired,
-      email: PropTypes.string.isRequired,
-      phone: PropTypes.string.isRequired,
-    }).isRequired,
-  ).isRequired,
-  onSelectUser: PropTypes.func.isRequired,
-  selectedUser: PropTypes.shape({
-    id: PropTypes.number.isRequired,
-    name: PropTypes.string.isRequired,
-    email: PropTypes.string.isRequired,
-    phone: PropTypes.string.isRequired,
-  }),
 };

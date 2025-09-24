@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
 import { Loader } from './Loader';
 import { NewCommentForm } from './NewCommentForm';
 import { Post } from '../types/Post';
@@ -121,28 +120,4 @@ export const PostDetails: React.FC<Props> = ({
       )}
     </div>
   );
-};
-
-PostDetails.propTypes = {
-  post: PropTypes.shape({
-    id: PropTypes.number.isRequired,
-    title: PropTypes.string.isRequired,
-    body: PropTypes.string.isRequired,
-    userId: PropTypes.number.isRequired,
-  }).isRequired,
-  comments: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.number.isRequired,
-      postId: PropTypes.number.isRequired,
-      name: PropTypes.string.isRequired,
-      email: PropTypes.string.isRequired,
-      body: PropTypes.string.isRequired,
-    }).isRequired,
-  ),
-  loadComments: PropTypes.func.isRequired,
-  isCommentsLoading: PropTypes.bool,
-  commentsLoadingError: PropTypes.bool,
-  deleteComment: PropTypes.func.isRequired,
-  addComment: PropTypes.func.isRequired,
-  addCommentError: PropTypes.bool,
 };
