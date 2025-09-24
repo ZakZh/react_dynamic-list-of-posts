@@ -18,13 +18,17 @@ import { Comment } from './types/Comment';
 export const App = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [isPostsLoading, setIsPostsLoading] = useState(false);
-  const [postsLoadingError, setPostsLoadingError] = useState(false);
+  const [postsState, setPostsState] = useState({
+    posts: [] as Post[],
+    isLoading: false,
+    error: false,
+  });
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [isCommentsLoading, setIsCommentsLoading] = useState(false);
-  const [commentsLoadingError, setCommentsLoadingError] = useState(false);
+  const [commentsState, setCommentsState] = useState({
+    comments: [] as Comment[],
+    isLoading: false,
+    error: false,
+  });
 
   useEffect(() => {
     client
@@ -38,18 +42,27 @@ export const App = () => {
       return;
     }
 
-    setIsPostsLoading(true);
-    setPostsLoadingError(false);
-    setPosts([]);
+    setPostsState({
+      posts: [],
+      isLoading: true,
+      error: false,
+    });
 
     client
       .get<Post[]>(`/posts?userId=${selectedUser.id}`)
-      .then(setPosts)
-      .catch(() => {
-        setPostsLoadingError(true);
+      .then(posts => {
+        setPostsState(prev => ({
+          ...prev,
+          posts,
+          isLoading: false,
+        }));
       })
-      .finally(() => {
-        setIsPostsLoading(false);
+      .catch(() => {
+        setPostsState(prev => ({
+          ...prev,
+          isLoading: false,
+          error: true,
+        }));
       });
   }, [selectedUser]);
 
@@ -67,22 +80,38 @@ export const App = () => {
       return;
     }
 
-    setIsCommentsLoading(true);
-    setCommentsLoadingError(false);
-    setComments([]);
+    setCommentsState({
+      comments: [],
+      isLoading: true,
+      error: false,
+    });
 
     client
       .get<Comment[]>(`/comments?postId=${selectedPost.id}`)
-      .then(setComments)
-      .catch(() => setCommentsLoadingError(true))
-      .finally(() => setIsCommentsLoading(false));
+      .then(comments => {
+        setCommentsState(prev => ({
+          ...prev,
+          comments,
+          isLoading: false,
+        }));
+      })
+      .catch(() => {
+        setCommentsState(prev => ({
+          ...prev,
+          isLoading: false,
+          error: true,
+        }));
+      });
   }, [selectedPost]);
 
   const addComment = (newComment: Omit<Comment, 'id'>) => {
     return client
       .post<Comment>('/comments', newComment)
       .then(comment => {
-        setComments(prevComments => [...prevComments, comment]);
+        setCommentsState(prev => ({
+          ...prev,
+          comments: [...prev.comments, comment],
+        }));
 
         return comment;
       })
@@ -92,17 +121,19 @@ export const App = () => {
   };
 
   const deleteComment = (commentId: number) => {
-    setComments(prevComments =>
-      prevComments.filter(comment => comment.id !== commentId),
-    );
+    const originalComments = commentsState.comments;
 
-    client
-      .delete(`/comments/${commentId}`)
-      .then(() =>
-        setComments(prevComments =>
-          prevComments.filter(comment => comment.id !== commentId),
-        ),
-      );
+    setCommentsState(prev => ({
+      ...prev,
+      comments: prev.comments.filter(comment => comment.id !== commentId),
+    }));
+
+    client.delete(`/comments/${commentId}`).catch(() => {
+      setCommentsState(prev => ({
+        ...prev,
+        comments: originalComments,
+      }));
+    });
   };
 
   return (
@@ -124,9 +155,9 @@ export const App = () => {
                   <p data-cy="NoSelectedUser">No user selected</p>
                 )}
 
-                {isPostsLoading && <Loader />}
+                {postsState.isLoading && <Loader />}
 
-                {postsLoadingError && (
+                {postsState.error && (
                   <div
                     className="notification is-danger"
                     data-cy="PostsLoadingError"
@@ -136,11 +167,11 @@ export const App = () => {
                 )}
 
                 {selectedUser &&
-                  !isPostsLoading &&
-                  !postsLoadingError &&
-                  (posts.length > 0 ? (
+                  !postsState.isLoading &&
+                  !postsState.error &&
+                  (postsState.posts.length > 0 ? (
                     <PostsList
-                      posts={posts}
+                      posts={postsState.posts}
                       setPost={togglePostSelect}
                       selectedPost={selectedPost}
                     />
@@ -170,10 +201,10 @@ export const App = () => {
               {selectedPost && (
                 <PostDetails
                   post={selectedPost}
-                  comments={comments}
+                  comments={commentsState.comments}
                   loadComments={loadComments}
-                  isCommentsLoading={isCommentsLoading}
-                  commentsLoadingError={commentsLoadingError}
+                  isCommentsLoading={commentsState.isLoading}
+                  commentsLoadingError={commentsState.error}
                   deleteComment={deleteComment}
                   addComment={addComment}
                 />

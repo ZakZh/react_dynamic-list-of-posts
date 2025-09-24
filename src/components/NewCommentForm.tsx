@@ -16,19 +16,23 @@ export const NewCommentForm: React.FC<Props> = ({ addComment, post }) => {
   const [body, setBody] = React.useState('');
   const [isBodyError, setIsBodyError] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
+  const [submitError, setSubmitError] = React.useState<string | null>(null);
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setIsNameError(false);
+    setSubmitError(null);
     setName(e.target.value);
   };
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setIsEmailError(false);
+    setSubmitError(null);
     setEmail(e.target.value);
   };
 
   const handleBodyChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setIsBodyError(false);
+    setSubmitError(null);
     setBody(e.target.value);
   };
 
@@ -61,6 +65,7 @@ export const NewCommentForm: React.FC<Props> = ({ addComment, post }) => {
     }
 
     setIsLoading(true);
+    setSubmitError(null);
 
     addComment({
       postId: post.id,
@@ -69,8 +74,10 @@ export const NewCommentForm: React.FC<Props> = ({ addComment, post }) => {
       body,
     })
       .then(() => {
-        setIsLoading(false);
         setBody('');
+      })
+      .catch(() => {
+        setSubmitError('Failed to add comment. Please try again.');
       })
       .finally(() => {
         setIsLoading(false);
@@ -84,6 +91,7 @@ export const NewCommentForm: React.FC<Props> = ({ addComment, post }) => {
     setIsNameError(false);
     setIsEmailError(false);
     setIsBodyError(false);
+    setSubmitError(null);
   };
 
   const handleClearButtonClick = (e: React.FormEvent) => {
@@ -189,6 +197,12 @@ export const NewCommentForm: React.FC<Props> = ({ addComment, post }) => {
           </p>
         )}
       </div>
+
+      {submitError && (
+        <div className="notification is-danger" data-cy="SubmitError">
+          {submitError}
+        </div>
+      )}
 
       <div className="field is-grouped">
         <div className="control">
