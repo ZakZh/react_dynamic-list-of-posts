@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { Post } from '../types/Post';
 import { Comment } from '../types/Comment';
@@ -6,17 +7,22 @@ import { Comment } from '../types/Comment';
 type Props = {
   addComment: (newComment: Omit<Comment, 'id'>) => Promise<Comment>;
   post: Post;
+  hasError?: boolean;
 };
 
-export const NewCommentForm: React.FC<Props> = ({ addComment, post }) => {
-  const [name, setName] = React.useState('');
-  const [isNameError, setIsNameError] = React.useState(false);
-  const [email, setEmail] = React.useState('');
-  const [isEmailError, setIsEmailError] = React.useState(false);
-  const [body, setBody] = React.useState('');
-  const [isBodyError, setIsBodyError] = React.useState(false);
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [submitError, setSubmitError] = React.useState<string | null>(null);
+export const NewCommentForm: React.FC<Props> = ({
+  addComment,
+  post,
+  hasError: externalHasError = false,
+}) => {
+  const [name, setName] = useState('');
+  const [isNameError, setIsNameError] = useState(false);
+  const [email, setEmail] = useState('');
+  const [isEmailError, setIsEmailError] = useState(false);
+  const [body, setBody] = useState('');
+  const [isBodyError, setIsBodyError] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setIsNameError(false);
@@ -75,12 +81,11 @@ export const NewCommentForm: React.FC<Props> = ({ addComment, post }) => {
     })
       .then(() => {
         setBody('');
+        setIsLoading(false);
       })
       .catch(() => {
-        setSubmitError('Failed to add comment. Please try again.');
-      })
-      .finally(() => {
         setIsLoading(false);
+        setSubmitError('Failed to add comment. Please try again.');
       });
   };
 
@@ -198,9 +203,10 @@ export const NewCommentForm: React.FC<Props> = ({ addComment, post }) => {
         )}
       </div>
 
-      {submitError && (
+      {(submitError || externalHasError) && (
         <div className="notification is-danger" data-cy="SubmitError">
-          {submitError}
+          {submitError ||
+            (externalHasError && 'Failed to add comment. Please try again.')}
         </div>
       )}
 
@@ -229,4 +235,15 @@ export const NewCommentForm: React.FC<Props> = ({ addComment, post }) => {
       </div>
     </form>
   );
+};
+
+NewCommentForm.propTypes = {
+  addComment: PropTypes.func.isRequired,
+  post: PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    title: PropTypes.string.isRequired,
+    body: PropTypes.string.isRequired,
+    userId: PropTypes.number.isRequired,
+  }).isRequired,
+  hasError: PropTypes.bool,
 };

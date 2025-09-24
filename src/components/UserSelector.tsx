@@ -1,26 +1,27 @@
-import React from 'react';
+import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { User } from '../types/User';
 
 type Props = {
   users: User[];
-  setUser: (user: User) => void;
+  onSelectUser: (user: User) => void;
   selectedUser: User | null;
 };
 
 export const UserSelector: React.FC<Props> = ({
   users,
-  setUser,
+  onSelectUser,
   selectedUser,
 }) => {
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
   };
 
   const handleUserSelect = (user: User) => {
-    setUser(user);
+    onSelectUser(user);
     setIsOpen(false);
   };
 
@@ -72,4 +73,22 @@ export const UserSelector: React.FC<Props> = ({
       </div>
     </div>
   );
+};
+
+UserSelector.propTypes = {
+  users: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      name: PropTypes.string.isRequired,
+      email: PropTypes.string.isRequired,
+      phone: PropTypes.string.isRequired,
+    }).isRequired,
+  ).isRequired,
+  onSelectUser: PropTypes.func.isRequired,
+  selectedUser: PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    name: PropTypes.string.isRequired,
+    email: PropTypes.string.isRequired,
+    phone: PropTypes.string.isRequired,
+  }),
 };

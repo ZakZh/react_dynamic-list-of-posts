@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 import { Loader } from './Loader';
 import { NewCommentForm } from './NewCommentForm';
 import { Post } from '../types/Post';
@@ -12,6 +13,7 @@ type Props = {
   commentsLoadingError?: boolean;
   deleteComment: (commentId: number) => void;
   addComment: (newComment: Omit<Comment, 'id'>) => Promise<Comment>;
+  addCommentError?: boolean;
 };
 
 export const PostDetails: React.FC<Props> = ({
@@ -22,15 +24,13 @@ export const PostDetails: React.FC<Props> = ({
   commentsLoadingError,
   deleteComment,
   addComment,
+  addCommentError,
 }) => {
-  const [isCommentFormVisible, setIsCommentFormVisible] = React.useState(false);
+  const [isCommentFormVisible, setIsCommentFormVisible] = useState(false);
 
   useEffect(() => {
-    if (post) {
-      loadComments();
-      setIsCommentFormVisible(false);
-    }
-  }, [post, loadComments]);
+    setIsCommentFormVisible(false);
+  }, [post]);
 
   const handleWriteCommentClick = () => {
     setIsCommentFormVisible(!isCommentFormVisible);
@@ -50,7 +50,14 @@ export const PostDetails: React.FC<Props> = ({
         <div className="block">
           {commentsLoadingError && (
             <div className="notification is-danger" data-cy="CommentsError">
-              Something went wrong
+              <div>Something went wrong</div>
+              <button
+                type="button"
+                className="button is-small is-danger is-outlined"
+                onClick={loadComments}
+              >
+                Try again
+              </button>
             </div>
           )}
 
@@ -106,8 +113,36 @@ export const PostDetails: React.FC<Props> = ({
       )}
 
       {isCommentFormVisible && (
-        <NewCommentForm addComment={addComment} post={post} />
+        <NewCommentForm
+          addComment={addComment}
+          post={post}
+          hasError={addCommentError}
+        />
       )}
     </div>
   );
+};
+
+PostDetails.propTypes = {
+  post: PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    title: PropTypes.string.isRequired,
+    body: PropTypes.string.isRequired,
+    userId: PropTypes.number.isRequired,
+  }).isRequired,
+  comments: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      postId: PropTypes.number.isRequired,
+      name: PropTypes.string.isRequired,
+      email: PropTypes.string.isRequired,
+      body: PropTypes.string.isRequired,
+    }).isRequired,
+  ),
+  loadComments: PropTypes.func.isRequired,
+  isCommentsLoading: PropTypes.bool,
+  commentsLoadingError: PropTypes.bool,
+  deleteComment: PropTypes.func.isRequired,
+  addComment: PropTypes.func.isRequired,
+  addCommentError: PropTypes.bool,
 };

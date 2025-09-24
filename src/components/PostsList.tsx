@@ -1,17 +1,18 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Post } from '../types/Post';
 import classNames from 'classnames';
 
 type Props = {
   posts: Post[];
   selectedPost: Post | null;
-  setPost: (postId: Post | null) => void;
+  onSelectPost: (post: Post | null) => void;
 };
 
 export const PostsList: React.FC<Props> = ({
   posts,
   selectedPost,
-  setPost,
+  onSelectPost,
 }) => (
   <div data-cy="PostsList">
     <p className="title">Posts:</p>
@@ -40,7 +41,7 @@ export const PostsList: React.FC<Props> = ({
                 className={classNames('button', 'is-link', {
                   'is-light': selectedPost?.id !== post.id,
                 })}
-                onClick={() => setPost(post)}
+                onClick={() => onSelectPost(post)}
               >
                 {selectedPost?.id === post.id ? 'Close' : 'Open'}
               </button>
@@ -51,3 +52,21 @@ export const PostsList: React.FC<Props> = ({
     </table>
   </div>
 );
+
+PostsList.propTypes = {
+  posts: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      title: PropTypes.string.isRequired,
+      body: PropTypes.string.isRequired,
+      userId: PropTypes.number.isRequired,
+    }).isRequired,
+  ).isRequired,
+  selectedPost: PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    title: PropTypes.string.isRequired,
+    body: PropTypes.string.isRequired,
+    userId: PropTypes.number.isRequired,
+  }),
+  onSelectPost: PropTypes.func.isRequired,
+};

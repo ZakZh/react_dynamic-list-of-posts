@@ -71,8 +71,8 @@ export const App = () => {
     setSelectedPost(null);
   };
 
-  const togglePostSelect = (postId: Post | null) => {
-    setSelectedPost(postId === selectedPost ? null : postId);
+  const handlePostSelect = (post: Post | null) => {
+    setSelectedPost(post === selectedPost ? null : post);
   };
 
   const loadComments = useCallback(() => {
@@ -103,6 +103,12 @@ export const App = () => {
         }));
       });
   }, [selectedPost]);
+
+  useEffect(() => {
+    if (selectedPost) {
+      loadComments();
+    }
+  }, [selectedPost, loadComments]);
 
   const addComment = (newComment: Omit<Comment, 'id'>) => {
     return client
@@ -145,7 +151,7 @@ export const App = () => {
               <div className="block">
                 <UserSelector
                   users={users}
-                  setUser={handleUserSelect}
+                  onSelectUser={handleUserSelect}
                   selectedUser={selectedUser}
                 />
               </div>
@@ -172,7 +178,7 @@ export const App = () => {
                   (postsState.posts.length > 0 ? (
                     <PostsList
                       posts={postsState.posts}
-                      setPost={togglePostSelect}
+                      onSelectPost={handlePostSelect}
                       selectedPost={selectedPost}
                     />
                   ) : (
