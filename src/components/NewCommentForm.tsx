@@ -31,13 +31,13 @@ export const NewCommentForm: React.FC<Props> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const handleFieldChange =
-    (field: keyof typeof formData) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleFieldChange = (field: keyof typeof formData) => {
+    return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       setFormData(prev => ({ ...prev, [field]: e.target.value }));
       setErrors(prev => ({ ...prev, [field]: false }));
       setSubmitError(null);
     };
+  };
 
   const validateForm = () => {
     const newErrors = {
@@ -47,6 +47,7 @@ export const NewCommentForm: React.FC<Props> = ({
     };
 
     setErrors(newErrors);
+
     return !Object.values(newErrors).some(Boolean);
   };
 
